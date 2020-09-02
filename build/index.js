@@ -10,7 +10,7 @@ dotenv.config();
 const client = new Discord.Client();
 const requirePrivileges = () => {
     return (message) => {
-        const hasPerms = message.member.hasPermission(['KICK_MEMBERS']);
+        const hasPerms = message.member.hasPermission(['MANAGE_GUILD']);
         return (hasPerms ? true : false);
     };
 };

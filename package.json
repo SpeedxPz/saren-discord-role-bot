@@ -28,7 +28,7 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },
-  "author": "Jakub Synowiec <github@jakubsynowiec.info>",
+  "author": "Takumi Producer <admin@4th.in.th>",
   "license": "Apache-2.0",
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
