@@ -1,2 +1,4 @@
-# saren-discord-role-bot
-Saren Discord Bot
+
+# discord-bot-template
+
+This is discord bot template
