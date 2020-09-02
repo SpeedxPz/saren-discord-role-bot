@@ -20,7 +20,7 @@ let botStorage = {};
 
 const readConfig = () : any => {
     try {
-        const data = fs.readFileSync('./storage.json', {encoding:'utf8', flag:'r'});
+        const data = fs.readFileSync(config.discordbot.jsonPath, {encoding:'utf8', flag:'r'});
         return JSON.parse(data);
     } catch {
         return JSON.parse("{}");
@@ -28,7 +28,7 @@ const readConfig = () : any => {
 }
 
 const saveConfig = () : any => {
-	fs.writeFileSync("./storage.json", JSON.stringify(botStorage));
+	fs.writeFileSync(config.discordbot.jsonPath, JSON.stringify(botStorage));
 }
 
 /*let voteInfo = [];
@@ -462,7 +462,7 @@ client.once('ready',async () => {
                 return message.reply(`Your new command prefix is **${cmd.getCommandPrefix()}**`);
             }
         });
-    Command.listen(client, './localdb.db');
+    Command.listen(client, config.discordbot.dbPath);
 
     client.on('messageReactionAdd', async ( reaction : Discord.MessageReaction, user : Discord.User) => {
         if (reaction.partial) {
