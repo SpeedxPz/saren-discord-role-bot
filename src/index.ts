@@ -20,7 +20,7 @@ let botStorage = {};
 
 const readConfig = () : any => {
     try {
-        const data = fs.readFileSync(config.discordbot.jsonPath, {encoding:'utf8', flag:'r'});
+        const data = fs.readFileSync(config.discordBot.jsonPath, {encoding:'utf8', flag:'r'});
         return JSON.parse(data);
     } catch {
         return JSON.parse("{}");
@@ -28,115 +28,9 @@ const readConfig = () : any => {
 }
 
 const saveConfig = () : any => {
-	fs.writeFileSync(config.discordbot.jsonPath, JSON.stringify(botStorage));
+	fs.writeFileSync(config.discordBot.jsonPath, JSON.stringify(botStorage));
 }
 
-/*let voteInfo = [];
-
-let isVoteStart = 0;
-let messageInstance : Discord.Message;*/
-
-
-/*const EmojiVotes = [
-    {
-        id: "718001335823499287",
-        name: "yuiwow",
-        explain : "Drama-CD ของ ทวิงเคิลวิช × ไวซ์ฟูลเกล (อีเว้นปีใหม่ + โอเอโดะ)"
-    },
-    {
-        id: "718001336158912527",
-        name: "yuiconfuse",
-        explain : "Drama-CD ของ นากาโยชิบุ x ลิตเติ้ล ลิลิคอล (อีเว้นฮาโลวีน + ยูนิจังอายุ 8 ขวบ)"
-    },
-    {
-        id: "718001336385273940",
-        name: "yaaay",
-        explain : "Drama-CD ของ โรงเรียนลูเซนท์ + คาออน (อีเว้นว่ายน้ำ 2019)"
-    },
-    {
-        id: "718001335961780297",
-        name: "uzukigan",
-        explain : "Drama-CD ของ คาออน only"
-    },
-    {
-        id: "718001335731093547",
-        name: "tyupakyabura",
-        explain : "โหวตให้ Drama-CD ของ คัลมิน่า"
-    },
-
-];*/
-
-/*const EmojiVotes = [
-    {
-        id: "734345707477139496",
-        name: "YuiConfuse",
-        explain : "Drama-CD ของ ทวิงเคิลวิช × ไวซ์ฟูลเกล (อีเว้นปีใหม่ + โอเอโดะ)"
-    },
-    {
-        id: "734345206601744514",
-        name: "YuniOnegai",
-        explain : "Drama-CD ของ นากาโยชิบุ x ลิตเติ้ล ลิลิคอล (อีเว้นฮาโลวีน + ยูนิจังอายุ 8 ขวบ)"
-    },
-    {
-        id: "734345205423144971",
-        name: "SuzunaWink",
-        explain : "Drama-CD ของ โรงเรียนลูเซนท์ + คาออน (อีเว้นว่ายน้ำ 2019)"
-    },
-    {
-        id: "734345728972816414",
-        name: "MakotoFloat",
-        explain : "Drama-CD ของ คาออน only"
-    },
-    {
-        id: "734345205045657680",
-        name: "NozomiShock",
-        explain : "โหวตให้ Drama-CD ของ คัลมิน่า"
-    },
-
-];*/
-
-/*const getVoteEmbed = () => {
-    const embed = {
-        "title": "Quick time event : มานั่งเม้า Drama-CD กัน",
-        "description": "Let's do the vote!",
-        "color": 16098851,
-        "fields": []
-    };
-
-
-    EmojiVotes.forEach((item) => {
-        embed.fields.push({
-            "name": "<:" + item.name + ":" + item.id + "> [Vote Count: " + voteInfo.filter( emote => emote.name == item.name).length + " ]",
-            "value": "โหวตให้ " + item.explain + "\n\n"
-        });
-    });
-
-    return embed;
-};*/
-
-/*const getVoteResult = (voteResults) => {
-    const embed = {
-        "title": "การโหวตจบลงแล้วจ้า!",
-        "description": "Quick time event : มานั่งเม้า Drama-CD กัน\n\n**ตัวเลือกที่ชนะการโหวตคือ**",
-        "color": 12118406,
-        "fields": []
-    };
-
-    const winner = voteResults.filter(item => item.voteCount == voteResults[0].voteCount);
-
-
-    winner.forEach(item => {
-        embed.fields.push({
-            "name": item.explain,
-            "value": item.voteCount + " โหวต"
-        });
-    });
-
-    
-    
-
-    return embed;
-};*/
 
 
 const getRoleAssignEmbed = (mappingList : any) => {
@@ -208,39 +102,41 @@ client.once('ready',async () => {
 
     for(let key in botStorage){
         if(botStorage[key].isRunning){
-            const channel: Discord.TextChannel = await client.channels.fetch(botStorage[key].trackMessageChannelId) as Discord.TextChannel;
-            const message: Discord.Message = await channel.messages.fetch(botStorage[key].trackMessageId);
+            try
+            {
+                const channel: Discord.TextChannel = await client.channels.fetch(botStorage[key].trackMessageChannelId) as Discord.TextChannel;
+                const message: Discord.Message = await channel.messages.fetch(botStorage[key].trackMessageId);
+                const guild = client.guilds.cache.get(key);
+                botStorage[key].roleMapping.forEach( async (item : any) => {
+                    const reaction = message.reactions.cache.find( x => x.emoji.id == item.emoteId);
 
-            const guild = client.guilds.cache.get(key);
-            botStorage[key].roleMapping.forEach( async (item : any) => {
-                const reaction = message.reactions.cache.find( x => x.emoji.id == item.emoteId);
-
-                if (reaction.partial) {
-                    try {
-                        await reaction.fetch();
-                    } catch (error) {
-                        return;
-                    }
-                }
-                await reaction.users.fetch();
-
-                guild.members.cache.forEach( async (member : Discord.GuildMember) => {
-
-                    if(member.user.id != client.user.id){
-                        const isHaveGuildRole = member.roles.cache.find( x => x.id == item.roleId);
-                        const isHaveReaction = reaction.users.cache.find( x => x.id == member.user.id);
-
-                        if(isHaveGuildRole && !isHaveReaction){
-                            member.roles.remove(item.roleId);
-                        } else if(!isHaveGuildRole && isHaveReaction){
-                            member.roles.add(item.roleId);
+                    if (reaction.partial) {
+                        try {
+                            await reaction.fetch();
+                        } catch (error) {
+                            return;
                         }
                     }
+                    await reaction.users.fetch();
 
+                    guild.members.cache.forEach( async (member : Discord.GuildMember) => {
+
+                        if(member.user.id != client.user.id){
+                            const isHaveGuildRole = member.roles.cache.find( x => x.id == item.roleId);
+                            const isHaveReaction = reaction.users.cache.find( x => x.id == member.user.id);
+
+                            if(isHaveGuildRole && !isHaveReaction){
+                                member.roles.remove(item.roleId);
+                            } else if(!isHaveGuildRole && isHaveReaction){
+                                member.roles.add(item.roleId);
+                            }
+                        }
+
+                    });
                 });
-            });
-
-            
+            } catch {
+                continue;
+            }
         }
     }
 
@@ -420,24 +316,29 @@ client.once('ready',async () => {
                 return message.reply(`You can't stop something that didn't start yet.`);
             }
 
-            const channel: Discord.TextChannel = await client.channels.fetch(botStorage[guildId].trackMessageChannelId) as Discord.TextChannel;
-            const msg: Discord.Message = await channel.messages.fetch(botStorage[guildId].trackMessageId);
-
-            msg.reactions.cache.forEach( (reaction : Discord.MessageReaction) => {
-                reaction.users.cache.forEach( (user : Discord.User) => {
-                    if(user.id != client.user.id){
-                        const ident = reaction.message.guild.members.cache.find(member => member.id == user.id);
-                        const reactObject = botStorage[guildId].roleMapping.find( x => x.emoteId == reaction.emoji.id);
-                        const hasRole = ident.roles.cache.find( role => (role.id == reactObject.roleId));
-                        if(hasRole){
-                            ident.roles.remove(reactObject.roleId);
-                            console.log(`Remove role ${reactObject.roleName} role for ${ident.displayName}`);
+            
+            try
+            {
+                const channel: Discord.TextChannel = await client.channels.fetch(botStorage[guildId].trackMessageChannelId) as Discord.TextChannel;
+                const msg: Discord.Message = await channel.messages.fetch(botStorage[guildId].trackMessageId);
+                msg.reactions.cache.forEach( (reaction : Discord.MessageReaction) => {
+                    reaction.users.cache.forEach( (user : Discord.User) => {
+                        if(user.id != client.user.id){
+                            const ident = reaction.message.guild.members.cache.find(member => member.id == user.id);
+                            const reactObject = botStorage[guildId].roleMapping.find( x => x.emoteId == reaction.emoji.id);
+                            const hasRole = ident.roles.cache.find( role => (role.id == reactObject.roleId));
+                            if(hasRole){
+                                ident.roles.remove(reactObject.roleId);
+                                console.log(`Remove role ${reactObject.roleName} role for ${ident.displayName}`);
+                            }
                         }
-                    }
+                    });
+                    
                 });
-                
-            });
-            await msg.delete();
+                await msg.delete();
+            } catch {
+                console.log("");
+            }
             message.channel.send({ embed: getEndEmbed()});
             botStorage[guildId].isRunning = false;
             return saveConfig();
@@ -462,7 +363,7 @@ client.once('ready',async () => {
                 return message.reply(`Your new command prefix is **${cmd.getCommandPrefix()}**`);
             }
         });
-    Command.listen(client, config.discordbot.dbPath);
+    Command.listen(client, config.discordBot.dbPath);
 
     client.on('messageReactionAdd', async ( reaction : Discord.MessageReaction, user : Discord.User) => {
         if (reaction.partial) {
